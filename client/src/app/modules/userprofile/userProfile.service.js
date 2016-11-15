@@ -14,7 +14,8 @@ class userProfileSvc {
                 fullName: name,
                 profilePic: picture.data.url,
                 address,
-                email
+                email,
+                token: localStorage.getItem('token')
             }
         });
     };

@@ -23,6 +23,14 @@ class productSvc {
             })
             .then(response => response.data);
     }
+
+    getProduct(id) {
+        return this.$http({
+                method: 'GET',
+                url: this.SERVER.URL + 'product/' + id
+            })
+            .then(response => response.data);
+    }
 }
 
 export default productSvc;

@@ -20,13 +20,15 @@ const userSchema = new Schema({
     history: [{
         paid: { type: Number, default: 0 },
         item: { type: Schema.Types.ObjectId, ref: 'product' }
-    }]
+    }],
+    token: String
 });
 
 const brewerySchema = new Schema({
     owner: { type: Schema.Types.ObjectId, ref: 'user' },
     fullName: String,
     profilePic: String,
+    backPic: String,
     address: String,
     email: { type: String, unique: true, lowercase: true },
     about: String,

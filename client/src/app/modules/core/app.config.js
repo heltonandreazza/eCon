@@ -1,9 +1,19 @@
-function config($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+function config($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider) {
+    //set token interceptors
+    $httpProvider.interceptors.push(function($q) {
+        return {
+            'request': function(config) {
 
-    // // Turn off caching for demo simplicity's sake
+                config.headers['Token'] = localStorage.getItem('token');
+                return config;
+            }
+        };
+    });
+
+    // Turn off caching for demo simplicity's sake
     $ionicConfigProvider.views.maxCache(0);
 
-    // // Turn off back button text
+    // Turn off back button text
     $ionicConfigProvider.backButton.previousTitleText(false);
 
 
@@ -165,11 +175,29 @@ function config($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
 
     .state('app.product', {
-        url: '/products',
+        url: '/product',
+        params: {
+            id: null
+        },
         views: {
             'menuContent': {
                 templateUrl: 'templates/product.html',
                 controller: 'ProductCtrl',
+                controllerAs: 'vm'
+
+            }
+        }
+    })
+
+    .state('app.brewery', {
+        url: '/brewery',
+        params: {
+            edit: null
+        },
+        views: {
+            'menuContent': {
+                templateUrl: 'templates/brewery.html',
+                controller: 'BreweryCtrl',
                 controllerAs: 'vm'
 
             }

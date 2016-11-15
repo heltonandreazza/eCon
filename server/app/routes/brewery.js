@@ -68,10 +68,10 @@ const searchBrewery = (req, res, next) => {
 }
 
 const createBrewery = (req, res, next) => {
-    console.log(req.body.user.profileId);
+    console.log(req.body.owner.id);
     async.waterfall([
         (callback) => {
-            findUser(req.body.user.profileId)
+            findUser(req.body.owner.id)
                 .then(user => {
                     if (user) {
                         callback(null, user);
@@ -89,6 +89,7 @@ const createBrewery = (req, res, next) => {
                     brewery.owner = user._id;
                     brewery.fullName = req.body.fullName;
                     brewery.profilePic = req.body.profilePic;
+                    brewery.backPic = req.body.backPic;
                     brewery.address = req.body.address;
                     brewery.email = req.body.email;
                     brewery.about = req.body.about;
@@ -118,7 +119,7 @@ const findUser = (profileId) => {
 }
 
 const updateBrewery = (req, res, next) => {
-    Brewery.findOne({ id: req.body._id }, function(err, brewery) {
+    Brewery.findOne({ _id: req.body._id }, function(err, brewery) {
         if (err) return next(err);
         if (!brewery) {
             res.json({ message: 'brewery not found' });
@@ -127,6 +128,7 @@ const updateBrewery = (req, res, next) => {
             //update
             brewery.fullName = req.body.fullName;
             brewery.profilePic = req.body.profilePic;
+            brewery.backPic = req.body.backPic;
             brewery.address = req.body.address;
             brewery.email = req.body.email;
             brewery.about = req.body.about;

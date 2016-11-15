@@ -5,11 +5,14 @@ const Product = db.productModel;
 const async = require('async');
 
 const getProduct = (req, res, next) => {
-    Product.findOne({ _id: req.params.id }, function(err, product) {
-        console.log(product)
-        if (err) return next(err);
-        res.json(product);
-    });
+    Product.findOne({ _id: req.params.id })
+        .populate('category')
+        .populate('brewery')
+        .exec((err, product) => {
+            console.log(product)
+            if (err) return next(err);
+            res.json(product);
+        });
 }
 
 const searchProduct = (req, res, next) => {

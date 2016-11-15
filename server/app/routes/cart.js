@@ -40,7 +40,7 @@ const addToCart = (req, res, next) => {
                 item.quantity = item.quantity + req.body.quantity;
             }
 
-            cart.total = (cart.total + parseFloat(req.body.price)).toFixed(2);
+            cart.total = cart.items.map(i => i.price * i.quantity).reduce((a, b) => a + b, 0).toFixed(2);
 
             cart.save(function(err) {
                 if (err) return next(err);
@@ -78,7 +78,7 @@ const plusOne = (req, res, next) => {
             if (item) {
                 item.quantity = item.quantity + 1;
 
-                cart.total = (cart.total + parseFloat(item.price)).toFixed(2);
+                cart.total = cart.items.map(i => i.price * i.quantity).reduce((a, b) => a + b, 0).toFixed(2);
                 cart.save(function(err) {
                     if (err) return next(err);
                     return res.json(cart);
@@ -120,7 +120,7 @@ const minusOne = (req, res, next) => {
                 if (item.quantity > 1) {
                     item.quantity = item.quantity - 1;
 
-                    cart.total = (cart.total - parseFloat(item.price)).toFixed(2);
+                    cart.total = cart.items.map(i => i.price * i.quantity).reduce((a, b) => a + b, 0).toFixed(2);
 
                     cart.save(function(err) {
                         if (err) return next(err);
@@ -161,7 +161,7 @@ const removeFromCart = (req, res, next) => {
             console.log(req.body._id)
             let item = cart.items.pop(String(req.body.item));
             if (item) {
-                cart.total = (cart.total - parseFloat(item.price)).toFixed(2);
+                cart.total = cart.items.map(i => i.price * i.quantity).reduce((a, b) => a + b, 0).toFixed(2);
                 cart.save(function(err, found) {
                     if (err) return next(err);
                     res.json(cart);

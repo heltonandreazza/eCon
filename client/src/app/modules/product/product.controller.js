@@ -2,7 +2,6 @@ class ProductCtrl {
     /* @ngInject */
     constructor($scope, $stateParams, $timeout, ngFB, ionicMaterialMotion, ionicMaterialInk, $state, productSvc, commonSvc) {
         this.$scope = $scope;
-        this.$stateParams = $stateParams;
         this.$timeout = $timeout;
         this.ionicMaterialMotion = ionicMaterialMotion;
         this.ionicMaterialInk = ionicMaterialInk;
@@ -10,21 +9,31 @@ class ProductCtrl {
         this.productSvc = productSvc;
         this.commonSvc = commonSvc;
 
-        this.activate();
+        this.id = $stateParams.id;
         this.product = {};
-
-        // this.product.image = 'https://cdn.filestackcontent.com/67w1jBMiS0il3Yos9X1w';
-        // document.getElementById("myImg").src = 'https://cdn.filestackcontent.com/67w1jBMiS0il3Yos9X1w';
+        if (this.id) {
+            this.quantity = 0;
+        }
         localStorage.setItem('appState', this.$state.current.name);
+
+        this.activate();
     }
 
 
     activate() {
         this.loadCategories();
-        this.$scope.$watch('vm.img', (n, o) => {
-            console.log(n, o);
-        });
+        if (this.id) {
+            this.loadProduct(this.id);
+        }
         this.ionicMaterialInk.displayEffect();
+    }
+
+    loadProduct(id) {
+        this.productSvc.getProduct(id)
+            .then(product => {
+                this.product = product;
+                document.getElementById("myImg").src = this.product.image;
+            });
     }
 
     loadCategories() {
@@ -65,6 +74,18 @@ class ProductCtrl {
                         .then(data => this.$state.go('app.myprofile'));
                 }
             });
+    }
+
+    addToCart(product) {
+        product.quantity = this.quantity;
+
+        if (product.quantity > 0) {
+            this.commonSvc.addToCart(product)
+                .then(response => {
+                    console.log(response);
+                    this.quantity = 0;
+                });
+        }
     }
 }
 

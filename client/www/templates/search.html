@@ -10,7 +10,7 @@
             </div>
             <div class="list animate-blinds">
                 <a ng-repeat="bre in vm.breweries" ng-click="vm.goBrewery(bre._id)" class="item item-avatar item-icon-right">
-                    <img src="../img/brou.png">
+                    <img src="{{bre.profilePic}}">
                     <h2>{{bre.fullName}}</h2>
                     <p>{{bre.description}}</p>
                     <i class="icon ion-beer muted"></i>

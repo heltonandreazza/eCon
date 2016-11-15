@@ -102,12 +102,18 @@
 
 	var _product2 = _interopRequireDefault(_product);
 
+	var _brewery = __webpack_require__(36);
+
+	var _brewery2 = _interopRequireDefault(_brewery);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	angular.module('app', ['ionic', 'ionic-material', 'ionMdInput', 'ion-floating-menu', _ngopenfb2.default, _core2.default, _common2.default, _login2.default, _profile2.default, _friends2.default, _activity2.default, _gallery2.default, _userProfile2.default, _search2.default, _rating2.default, _cart2.default, _about2.default, _product2.default]).run(function ($window, ngFB) {
+	angular.module('app', ['ionic', 'ionic-material', 'ionMdInput', 'ion-floating-menu', _ngopenfb2.default, _core2.default, _common2.default, _login2.default, _profile2.default, _friends2.default, _activity2.default, _gallery2.default, _userProfile2.default, _search2.default, _rating2.default, _cart2.default, _about2.default, _product2.default, _brewery2.default]).run(function ($window, ngFB) {
+	    //set api auth public
 	    $window.openFB = openFB;
-	    window.teste = "ete";
+	    //set app id to use facebook auth
 	    ngFB.init({ appId: '914923135308655' });
+	    //set key to use filepicker
 	    filepicker.setKey('AUxfOdq2QTCOI7WA9Uopwz');
 	});
 
@@ -658,12 +664,22 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	function config($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+	function config($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpProvider) {
+	    //set token interceptors
+	    $httpProvider.interceptors.push(function ($q) {
+	        return {
+	            'request': function request(config) {
 
-	    // // Turn off caching for demo simplicity's sake
+	                config.headers['Token'] = localStorage.getItem('token');
+	                return config;
+	            }
+	        };
+	    });
+
+	    // Turn off caching for demo simplicity's sake
 	    $ionicConfigProvider.views.maxCache(0);
 
-	    // // Turn off back button text
+	    // Turn off back button text
 	    $ionicConfigProvider.backButton.previousTitleText(false);
 
 	    $stateProvider.state('app', {
@@ -798,11 +814,27 @@
 	            }
 	        }
 	    }).state('app.product', {
-	        url: '/products',
+	        url: '/product',
+	        params: {
+	            id: null
+	        },
 	        views: {
 	            'menuContent': {
 	                templateUrl: 'templates/product.html',
 	                controller: 'ProductCtrl',
+	                controllerAs: 'vm'
+
+	            }
+	        }
+	    }).state('app.brewery', {
+	        url: '/brewery',
+	        params: {
+	            edit: null
+	        },
+	        views: {
+	            'menuContent': {
+	                templateUrl: 'templates/brewery.html',
+	                controller: 'BreweryCtrl',
 	                controllerAs: 'vm'
 
 	            }
@@ -1018,7 +1050,6 @@
 	        this.ionicMaterialMotion = ionicMaterialMotion;
 	        this.ionicMaterialInk = ionicMaterialInk;
 	        this.$state = $state;
-	        console.log(this.$state.current.name);
 	        this.$scope = $scope;
 	        this.profileSvc = profileSvc;
 	        this.commonSvc = commonSvc;
@@ -1039,7 +1070,6 @@
 	        key: 'activate',
 	        value: function activate() {
 	            this.loadBrewery();
-
 	            // Set Ink
 	            this.ionicMaterialInk.displayEffect();
 	        }
@@ -1055,6 +1085,10 @@
 	                });
 	            } else {
 	                this.commonSvc.getBreweryByOwner().then(function (brewery) {
+	                    if (!brewery) {
+	                        _this.showbt = true;
+	                        return;
+	                    }
 	                    _this.brewery = brewery;
 	                    _this.id = _this.brewery._id;
 	                    _this.loadBeers(_this.id);
@@ -1081,7 +1115,8 @@
 	        value: function addToCart(beer) {
 	            if (beer.quantity > 0) {
 	                this.commonSvc.addToCart(beer).then(function (response) {
-	                    return console.log(response);
+	                    console.log(response);
+	                    beer.quantity = 0;
 	                });
 	            }
 	        }
@@ -1099,6 +1134,21 @@
 	        key: 'goNewProduct',
 	        value: function goNewProduct() {
 	            this.$state.go('app.product');
+	        }
+	    }, {
+	        key: 'goProductDetails',
+	        value: function goProductDetails(id) {
+	            this.$state.go('app.product', { id: id });
+	        }
+	    }, {
+	        key: 'goEditBrewery',
+	        value: function goEditBrewery() {
+	            this.$state.go('app.brewery', { edit: true });
+	        }
+	    }, {
+	        key: 'goNewBrewery',
+	        value: function goNewBrewery() {
+	            this.$state.go('app.brewery');
 	        }
 	    }, {
 	        key: 'setMotion',
@@ -1513,7 +1563,8 @@
 	                    fullName: name,
 	                    profilePic: picture.data.url,
 	                    address: address,
-	                    email: email
+	                    email: email,
+	                    token: localStorage.getItem('token')
 	                }
 	            });
 	        }
@@ -1820,49 +1871,62 @@
 	            this.cartSvc.getCartItems().then(function (cart) {
 	                _this.cart = cart;
 	                _this.beers = cart.items;
-	                console.log(cart);
 	                _this.setMotion();
+	                _this.setImages();
 	            });
+	        }
+	    }, {
+	        key: 'setImages',
+	        value: function setImages() {
+	            var _this2 = this;
+
+	            this.$timeout(function () {
+	                _this2.beers.forEach(function (b) {
+	                    return document.getElementById(b.item._id).src = b.item.image;
+	                });
+	            }, 0);
 	        }
 	    }, {
 	        key: 'minusOne',
 	        value: function minusOne(id) {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            console.log('minusOne');
 	            this.cartSvc.minusOne(id).then(function (cart) {
-	                return _this2.cart = cart;
+	                return _this3.cart = cart;
 	            });
 	        }
 	    }, {
 	        key: 'plusOne',
 	        value: function plusOne(id) {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            console.log('plusOne');
 	            this.cartSvc.plusOne(id).then(function (cart) {
-	                return _this3.cart = cart;
+	                return _this4.cart = cart;
 	            });
 	        }
 	    }, {
 	        key: 'removeFromCart',
 	        value: function removeFromCart(id) {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            this.cartSvc.removeFromCart(id).then(function (cart) {
-	                _this4.cart = cart;
-	                _this4.beers = cart.items;
-	                console.log(cart);
-	                _this4.setMotion();
+	                _this5.activate();
 	            });
+	        }
+	    }, {
+	        key: 'goProductDetails',
+	        value: function goProductDetails(id) {
+	            this.$state.go('app.product', { id: id });
 	        }
 	    }, {
 	        key: 'setMotion',
 	        value: function setMotion() {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            this.$timeout(function () {
-	                _this5.ionicMaterialMotion.blinds({
+	                _this6.ionicMaterialMotion.blinds({
 	                    startVelocity: 4100
 	                });
 	            }, 0);
@@ -2200,7 +2264,6 @@
 	        _classCallCheck(this, ProductCtrl);
 
 	        this.$scope = $scope;
-	        this.$stateParams = $stateParams;
 	        this.$timeout = $timeout;
 	        this.ionicMaterialMotion = ionicMaterialMotion;
 	        this.ionicMaterialInk = ionicMaterialInk;
@@ -2208,36 +2271,48 @@
 	        this.productSvc = productSvc;
 	        this.commonSvc = commonSvc;
 
-	        this.activate();
+	        this.id = $stateParams.id;
 	        this.product = {};
-
-	        // this.product.image = 'https://cdn.filestackcontent.com/67w1jBMiS0il3Yos9X1w';
-	        // document.getElementById("myImg").src = 'https://cdn.filestackcontent.com/67w1jBMiS0il3Yos9X1w';
+	        if (this.id) {
+	            this.quantity = 0;
+	        }
 	        localStorage.setItem('appState', this.$state.current.name);
+
+	        this.activate();
 	    }
 
 	    _createClass(ProductCtrl, [{
 	        key: 'activate',
 	        value: function activate() {
 	            this.loadCategories();
-	            this.$scope.$watch('vm.img', function (n, o) {
-	                console.log(n, o);
-	            });
+	            if (this.id) {
+	                this.loadProduct(this.id);
+	            }
 	            this.ionicMaterialInk.displayEffect();
+	        }
+	    }, {
+	        key: 'loadProduct',
+	        value: function loadProduct(id) {
+	            var _this = this;
+
+	            this.productSvc.getProduct(id).then(function (product) {
+	                _this.product = product;
+	                document.getElementById("myImg").src = _this.product.image;
+	            });
 	        }
 	    }, {
 	        key: 'loadCategories',
 	        value: function loadCategories() {
-	            var _this = this;
+	            var _this2 = this;
 
 	            this.productSvc.getCategories().then(function (categories) {
-	                return _this.categories = categories;
+	                return _this2.categories = categories;
 	            });
 	        }
 	    }, {
 	        key: 'upload',
 	        value: function upload() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            filepicker.pick({
 	                mimetype: 'image/*',
@@ -2245,8 +2320,8 @@
 	                services: ['COMPUTER', 'FACEBOOK', 'INSTAGRAM', 'GOOGLE_DRIVE', 'DROPBOX']
 	            }, function (image) {
 	                document.getElementById("myImg").src = image.url;
-	                _this2.product.image = image.url;
-	                console.log(_this2.product.image);
+	                _this3.product.image = image.url;
+	                console.log(_this3.product.image);
 	                console.log(image);
 	            }, function (FPError) {
 	                console.log(FPError.toString());
@@ -2265,15 +2340,29 @@
 	    }, {
 	        key: 'createProduct',
 	        value: function createProduct(product) {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            this.commonSvc.getBreweryByOwner().then(function (brewery) {
 	                if (brewery) {
-	                    _this3.productSvc.createProduct(brewery, product).then(function (data) {
-	                        return _this3.$state.go('app.myprofile');
+	                    _this4.productSvc.createProduct(brewery, product).then(function (data) {
+	                        return _this4.$state.go('app.myprofile');
 	                    });
 	                }
 	            });
+	        }
+	    }, {
+	        key: 'addToCart',
+	        value: function addToCart(product) {
+	            var _this5 = this;
+
+	            product.quantity = this.quantity;
+
+	            if (product.quantity > 0) {
+	                this.commonSvc.addToCart(product).then(function (response) {
+	                    console.log(response);
+	                    _this5.quantity = 0;
+	                });
+	            }
 	        }
 	    }]);
 
@@ -2328,12 +2417,212 @@
 	                return response.data;
 	            });
 	        }
+	    }, {
+	        key: 'getProduct',
+	        value: function getProduct(id) {
+	            return this.$http({
+	                method: 'GET',
+	                url: this.SERVER.URL + 'product/' + id
+	            }).then(function (response) {
+	                return response.data;
+	            });
+	        }
 	    }]);
 
 	    return productSvc;
 	}();
 
 	exports.default = productSvc;
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _brewery = __webpack_require__(37);
+
+	var _brewery2 = _interopRequireDefault(_brewery);
+
+	var _brewery3 = __webpack_require__(38);
+
+	var _brewery4 = _interopRequireDefault(_brewery3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = angular.module('app.brewery', []).controller('BreweryCtrl', _brewery2.default).service('brewerySvc', _brewery4.default).name;
+
+/***/ },
+/* 37 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var BreweryCtrl = function () {
+	    /* @ngInject */
+	    function BreweryCtrl($scope, $stateParams, $timeout, ngFB, ionicMaterialMotion, ionicMaterialInk, $state, brewerySvc, commonSvc) {
+	        _classCallCheck(this, BreweryCtrl);
+
+	        this.$scope = $scope;
+	        this.$timeout = $timeout;
+	        this.ionicMaterialMotion = ionicMaterialMotion;
+	        this.ionicMaterialInk = ionicMaterialInk;
+	        this.$state = $state;
+	        this.brewerySvc = brewerySvc;
+	        this.commonSvc = commonSvc;
+	        this.edit = $stateParams.edit;
+	        this.brewery = {
+	            owner: JSON.parse(localStorage.getItem('user'))
+	        };
+	        this.brewery.owner.fullName = this.brewery.owner.name;
+
+	        document.getElementById("myImgProfile").src = '../img/firstbrewery.jpg';
+	        document.getElementById("myImgBack").style.backgroundImage = "url('../img/back.jpg')";
+	        this.brewery.profilePic = '../img/firstbrewery.jpg';
+	        this.brewery.backPic = '../img/back.jpg';
+
+	        this.pick_config = {
+	            mimetype: 'image/*',
+	            container: 'window',
+	            services: ['COMPUTER', 'FACEBOOK', 'INSTAGRAM', 'GOOGLE_DRIVE', 'DROPBOX']
+	        };
+
+	        localStorage.setItem('appState', this.$state.current.name);
+
+	        this.activate();
+	    }
+
+	    _createClass(BreweryCtrl, [{
+	        key: 'activate',
+	        value: function activate() {
+	            if (this.edit) {
+	                this.loadBrewery();
+	            }
+	            this.ionicMaterialInk.displayEffect();
+	        }
+	    }, {
+	        key: 'loadBrewery',
+	        value: function loadBrewery() {
+	            var _this = this;
+
+	            this.commonSvc.getBreweryByOwner().then(function (brewery) {
+	                brewery.initDate = new Date(brewery.initDate);
+	                _this.brewery = brewery;
+	                document.getElementById("myImgProfile").src = _this.brewery.profilePic;
+	                document.getElementById("myImgBack").style.backgroundImage = "url('" + _this.brewery.backPic + "')";
+	            });
+	        }
+	    }, {
+	        key: 'uploadProfile',
+	        value: function uploadProfile() {
+	            var _this2 = this;
+
+	            console.log('uploadProfile');
+	            filepicker.pick(this.pick_config, function (image) {
+	                document.getElementById("myImgProfile").src = image.url;
+	                _this2.brewery.profilePic = image.url;
+	            }, function (FPError) {
+	                console.log(FPError.toString());
+	            });
+	        }
+	    }, {
+	        key: 'uploadBack',
+	        value: function uploadBack() {
+	            var _this3 = this;
+
+	            console.log('uploadBack');
+	            filepicker.pick(this.pick_config, function (image) {
+	                document.getElementById("myImgBack").style.backgroundImage = "url('" + image.url + "')";
+	                _this3.brewery.backPic = image.url;
+	            }, function (FPError) {
+	                console.log(FPError.toString());
+	            });
+	        }
+	    }, {
+	        key: 'createBrewery',
+	        value: function createBrewery(brewery) {
+	            var _this4 = this;
+
+	            if (this.edit) {
+	                this.brewerySvc.updateBrewery(brewery).then(function (data) {
+	                    return _this4.$state.go('app.myprofile');
+	                });
+	            } else {
+	                this.brewerySvc.createBrewery(brewery).then(function (data) {
+	                    return _this4.$state.go('app.myprofile');
+	                });
+	            }
+	        }
+	    }]);
+
+	    return BreweryCtrl;
+	}();
+
+	exports.default = BreweryCtrl;
+
+/***/ },
+/* 38 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var brewerySvc = function () {
+	    /*@ngInject*/
+	    function brewerySvc($http, SERVER) {
+	        _classCallCheck(this, brewerySvc);
+
+	        this.$http = $http;
+	        this.SERVER = SERVER;
+	    }
+
+	    _createClass(brewerySvc, [{
+	        key: 'createBrewery',
+	        value: function createBrewery(brewery) {
+	            return this.$http({
+	                method: 'POST',
+	                url: this.SERVER.URL + 'brewery',
+	                data: brewery
+	            }).then(function (response) {
+	                return console.log(response.data);
+	            });
+	        }
+	    }, {
+	        key: 'updateBrewery',
+	        value: function updateBrewery(brewery) {
+	            return this.$http({
+	                method: 'POST',
+	                url: this.SERVER.URL + 'updateBrewery',
+	                data: brewery
+	            }).then(function (response) {
+	                return console.log(response.data);
+	            });
+	        }
+	    }]);
+
+	    return brewerySvc;
+	}();
+
+	exports.default = brewerySvc;
 
 /***/ }
 /******/ ]);

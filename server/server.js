@@ -35,7 +35,7 @@ app.use(require('morgan')('combined', {
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://localhost:8100');
     res.header('Access-Control-Allow-Methods', 'HEAD, GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Origin, Accept');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Origin, Accept, Token');
     res.header('Access-Control-Allow-Credentials', 'true');
 
     if (req.method.toLowerCase() === "options") {
@@ -45,13 +45,15 @@ app.use(function(req, res, next) {
     }
 });
 //utils
-app.use(eConBack.utils.cartLength);
+// app.use(eConBack.utils.cartLength);
 //parsers
 app.use(cookieParser());
 //Handles post requests
 app.use(bodyParser());
 //Handles put requests
 // app.use(methodOverride());
+//check token
+app.use('/', eConBack.utils.checkToken);
 //routes
 app.use('/', eConBack.router);
 

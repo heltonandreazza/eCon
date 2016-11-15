@@ -12,6 +12,7 @@ import rating from './modules/rating/rating.module';
 import cart from './modules/cart/cart.module';
 import about from './modules/about/about.module';
 import product from './modules/product/product.module';
+import brewery from './modules/brewery/brewery.module';
 
 angular.module('app', [
         'ionic',
@@ -31,12 +32,15 @@ angular.module('app', [
         rating,
         cart,
         about,
-        product
+        product,
+        brewery
     ])
     .run(function($window, ngFB) {
+        //set api auth public
         $window.openFB = openFB;
-        window.teste = "ete";
+        //set app id to use facebook auth
         ngFB.init({ appId: '914923135308655' });
+        //set key to use filepicker
         filepicker.setKey('AUxfOdq2QTCOI7WA9Uopwz');
     });
 

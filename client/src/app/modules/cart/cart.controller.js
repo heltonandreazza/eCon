@@ -27,9 +27,15 @@ class CartCtrl {
             .then(cart => {
                 this.cart = cart;
                 this.beers = cart.items;
-                console.log(cart);
                 this.setMotion();
+                this.setImages();
             });
+    }
+
+    setImages() {
+        this.$timeout(() => {
+            this.beers.forEach(b => document.getElementById(b.item._id).src = b.item.image)
+        }, 0);
     }
 
     minusOne(id) {
@@ -47,11 +53,12 @@ class CartCtrl {
     removeFromCart(id) {
         this.cartSvc.removeFromCart(id)
             .then(cart => {
-                this.cart = cart;
-                this.beers = cart.items;
-                console.log(cart);
-                this.setMotion();
+                this.activate();
             });
+    }
+
+    goProductDetails(id) {
+        this.$state.go('app.product', { id: id });
     }
 
     setMotion() {

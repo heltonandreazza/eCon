@@ -8,7 +8,6 @@ class ProfileCtrl {
         this.ionicMaterialMotion = ionicMaterialMotion;
         this.ionicMaterialInk = ionicMaterialInk;
         this.$state = $state;
-        console.log(this.$state.current.name)
         this.$scope = $scope;
         this.profileSvc = profileSvc;
         this.commonSvc = commonSvc;
@@ -27,7 +26,6 @@ class ProfileCtrl {
 
     activate() {
         this.loadBrewery();
-
         // Set Ink
         this.ionicMaterialInk.displayEffect();
     }
@@ -42,6 +40,10 @@ class ProfileCtrl {
         } else {
             this.commonSvc.getBreweryByOwner()
                 .then(brewery => {
+                    if (!brewery) {
+                        this.showbt = true;
+                        return;
+                    }
                     this.brewery = brewery;
                     this.id = this.brewery._id;
                     this.loadBeers(this.id);
@@ -64,7 +66,10 @@ class ProfileCtrl {
     addToCart(beer) {
         if (beer.quantity > 0) {
             this.commonSvc.addToCart(beer)
-                .then(response => console.log(response));
+                .then(response => {
+                    console.log(response);
+                    beer.quantity = 0;
+                });
         }
     }
 
@@ -78,6 +83,18 @@ class ProfileCtrl {
 
     goNewProduct() {
         this.$state.go('app.product');
+    }
+
+    goProductDetails(id) {
+        this.$state.go('app.product', { id: id });
+    }
+
+    goEditBrewery() {
+        this.$state.go('app.brewery', { edit: true });
+    }
+
+    goNewBrewery() {
+        this.$state.go('app.brewery');
     }
 
     setMotion() {

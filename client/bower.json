@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "babel-polyfill": "^0.0.1",
-    "requirejs": "^2.3.2"
+    "requirejs": "^2.3.2",
+    "angular-aria": "^1.5.8",
+    "angular-material": "^1.1.1"
   }
 }

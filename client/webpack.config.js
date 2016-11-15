@@ -2,7 +2,7 @@ var path = require("path");
 var webpack = require("webpack");
 
 module.exports = {
-    entry: './src/app/app',
+    entry: './src/app/app.module',
     watch: true,
     module: {
         loaders: [
@@ -22,7 +22,7 @@ module.exports = {
         publicPath: __dirname + '/public'
     },
     output: {
-        path: path.join(__dirname, '/www/js/'),        
-        filename: 'bundle.js'
+        path: path.join(__dirname, '/www/js/'),
+        filename: 'app.js'
     }
 };

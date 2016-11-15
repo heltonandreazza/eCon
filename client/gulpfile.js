@@ -16,29 +16,29 @@ var paths = {
     sass: ['./scss/**/*.scss']
 };
 
-gulp.task('webpack', function() {
-    gulp.src(paths.es6)
-        .pipe(webpack({
-            watch: true,
-            module: {
-                loaders: [
-                    { test: /\.css$/, loader: 'style!css' },
-                    {
-                        test: /\.js$/,
-                        exclude: /(node_modules|bower_components)/,
-                        loader: 'babel', // 'babel-loader' is also a valid name to reference
-                        query: {
-                            presets: ['es2015']
-                        }
-                    }
-                ],
-            },
-            output: {
-                filename: 'app.js'
-            }
-        }))
-        .pipe(gulp.dest('www/js/'))
-});
+// gulp.task('webpack', function() {
+//     gulp.src(paths.es6)
+//         .pipe(webpack({
+//             watch: true,
+//             module: {
+//                 loaders: [
+//                     { test: /\.css$/, loader: 'style!css' },
+//                     {
+//                         test: /\.js$/,
+//                         exclude: /(node_modules|bower_components)/,
+//                         loader: 'babel', // 'babel-loader' is also a valid name to reference
+//                         query: {
+//                             presets: ['es2015']
+//                         }
+//                     }
+//                 ],
+//             },
+//             output: {
+//                 filename: 'app.js'
+//             }
+//         }))
+//         .pipe(gulp.dest('www/js/'))
+// });
 
 gulp.task("webpack-dev-server", function(callback) {
     // modify some webpack config options

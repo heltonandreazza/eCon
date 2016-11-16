@@ -16,8 +16,8 @@
                         <div ng-if="vm.id">
                             <button ng-click="vm.addToCart(vm.product)" style="margin-left: 36px;" class="button button-small button-positive icon ion-ios-cart"></button>
                             <span style="vertical-align: bottom; padding-left: 10px; padding-right: 10px;">{{ vm.quantity }}</span>
-                            <button ng-click="vm.quantity = vm.quantity - ( vm.quantity > 0 ? 1 : 0)" class="button button-small button-assertive icon ion-minus"></button>
-                            <button ng-click="vm.quantity = vm.quantity + 1" class="button button-small button-balanced icon ion-plus"></button>
+                            <button style="padding-right: 15px; padding-left: 15px;" ng-click="vm.quantity = vm.quantity - ( vm.quantity > 0 ? 1 : 0)" class="button button-small button-assertive icon ion-minus"></button>
+                            <button style="padding-right: 15px; padding-left: 15px;" ng-click="vm.quantity = vm.quantity + 1" class="button button-small button-balanced icon ion-plus"></button>
                         </div>
                     </div>
 

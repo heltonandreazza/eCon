@@ -677,7 +677,7 @@
 	    });
 
 	    // Turn off caching for demo simplicity's sake
-	    $ionicConfigProvider.views.maxCache(0);
+	    // $ionicConfigProvider.views.maxCache(1);
 
 	    // Turn off back button text
 	    $ionicConfigProvider.backButton.previousTitleText(false);
@@ -1163,7 +1163,7 @@
 
 	            this.$timeout(function () {
 	                _this3.ionicMaterialMotion.fadeSlideInRight({
-	                    startVelocity: 3000
+	                    startVelocity: 1000
 	                });
 	            }, 700);
 	        }

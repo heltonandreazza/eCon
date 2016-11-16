@@ -106,7 +106,7 @@ class ProfileCtrl {
 
         this.$timeout(() => {
             this.ionicMaterialMotion.fadeSlideInRight({
-                startVelocity: 3000
+                startVelocity: 1000
             });
         }, 700);
     }

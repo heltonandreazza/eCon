@@ -11,7 +11,7 @@ function config($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpP
     });
 
     // Turn off caching for demo simplicity's sake
-    // $ionicConfigProvider.views.maxCache(1);
+    $ionicConfigProvider.views.maxCache(0);
 
     // Turn off back button text
     $ionicConfigProvider.backButton.previousTitleText(false);
@@ -184,7 +184,6 @@ function config($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpP
                 templateUrl: 'templates/product.html',
                 controller: 'ProductCtrl',
                 controllerAs: 'vm'
-
             }
         }
     })
@@ -198,6 +197,21 @@ function config($stateProvider, $urlRouterProvider, $ionicConfigProvider, $httpP
             'menuContent': {
                 templateUrl: 'templates/brewery.html',
                 controller: 'BreweryCtrl',
+                controllerAs: 'vm'
+
+            }
+        }
+    })
+
+    .state('app.payment', {
+        url: '/payment',
+        params: {
+            totalPrice: 0
+        },
+        views: {
+            'menuContent': {
+                templateUrl: 'templates/payment.html',
+                controller: 'PaymentCtrl',
                 controllerAs: 'vm'
 
             }

@@ -8,6 +8,7 @@ const cart = require('./cart');
 const product = require('./product');
 const category = require('./category');
 const brewery = require('./brewery');
+const payment = require('./payment');
 
 let routes = {
     'get': {
@@ -36,6 +37,8 @@ let routes = {
         '/updateCategory': category.updateCategory,
         '/updateProduct': product.updateProduct,
         '/updateBrewery': brewery.updateBrewery,
+        '/payment': payment.charge,
+        '/userHistory': user.history
     },
     'NA': (req, res, next) => {
         res.status(404).sendFile(process.cwd() + '/views/404.htm');

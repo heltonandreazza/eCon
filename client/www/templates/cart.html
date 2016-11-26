@@ -1,5 +1,5 @@
 <ion-view>
-    <ion-floating-button click="vm.buy()" button-color="#E65100" icon="ion-social-usd"></ion-floating-button>
+    <ion-floating-button click="vm.pay()" button-color="#E65100" icon="ion-social-usd"></ion-floating-button>
     <ion-content>
         <div class="content has-header">
             <div class="list animate-blinds">
@@ -15,7 +15,6 @@
                     <label class="item item-input input-custom">
                         <span>Quantity:</span>
                         <input type="number" ng-model="beer.quantity">
-                    </label>
                     </label>
                     <button ng-click="vm.removeFromCart(beer._id)" class="button button-small button-assertive" type="button">remove</button>
                     <a ng-click="beer.quantity = beer.quantity - ( beer.quantity > 1 ? 1 : 0); vm.minusOne(beer.item._id)" class="icon ion-minus-circled red left"></a>

@@ -74,47 +74,53 @@
 
 	var _activity2 = _interopRequireDefault(_activity);
 
-	var _gallery = __webpack_require__(17);
+	var _gallery = __webpack_require__(18);
 
 	var _gallery2 = _interopRequireDefault(_gallery);
 
-	var _userProfile = __webpack_require__(19);
+	var _userProfile = __webpack_require__(20);
 
 	var _userProfile2 = _interopRequireDefault(_userProfile);
 
-	var _search = __webpack_require__(22);
+	var _search = __webpack_require__(23);
 
 	var _search2 = _interopRequireDefault(_search);
 
-	var _rating = __webpack_require__(25);
+	var _rating = __webpack_require__(26);
 
 	var _rating2 = _interopRequireDefault(_rating);
 
-	var _cart = __webpack_require__(27);
+	var _cart = __webpack_require__(28);
 
 	var _cart2 = _interopRequireDefault(_cart);
 
-	var _about = __webpack_require__(30);
+	var _about = __webpack_require__(31);
 
 	var _about2 = _interopRequireDefault(_about);
 
-	var _product = __webpack_require__(33);
+	var _product = __webpack_require__(34);
 
 	var _product2 = _interopRequireDefault(_product);
 
-	var _brewery = __webpack_require__(36);
+	var _brewery = __webpack_require__(37);
 
 	var _brewery2 = _interopRequireDefault(_brewery);
 
+	var _payment = __webpack_require__(40);
+
+	var _payment2 = _interopRequireDefault(_payment);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	angular.module('app', ['ionic', 'ionic-material', 'ionMdInput', 'ion-floating-menu', _ngopenfb2.default, _core2.default, _common2.default, _login2.default, _profile2.default, _friends2.default, _activity2.default, _gallery2.default, _userProfile2.default, _search2.default, _rating2.default, _cart2.default, _about2.default, _product2.default, _brewery2.default]).run(function ($window, ngFB) {
+	angular.module('app', ['ionic', 'ionic-material', 'ionMdInput', 'ion-floating-menu', 'angularPayments', _ngopenfb2.default, _core2.default, _common2.default, _login2.default, _profile2.default, _friends2.default, _activity2.default, _gallery2.default, _userProfile2.default, _search2.default, _rating2.default, _cart2.default, _about2.default, _product2.default, _brewery2.default, _payment2.default]).run(function ($window, ngFB) {
 	    //set api auth public
 	    $window.openFB = openFB;
 	    //set app id to use facebook auth
 	    ngFB.init({ appId: '914923135308655' });
 	    //set key to use filepicker
 	    filepicker.setKey('AUxfOdq2QTCOI7WA9Uopwz');
+	    //set key to use stripe
+	    $window.Stripe.setPublishableKey('pk_test_sAhz1rf5oASMgrPIe6v36Zte');
 	});
 
 	var openFB = function () {
@@ -677,7 +683,7 @@
 	    });
 
 	    // Turn off caching for demo simplicity's sake
-	    // $ionicConfigProvider.views.maxCache(1);
+	    $ionicConfigProvider.views.maxCache(0);
 
 	    // Turn off back button text
 	    $ionicConfigProvider.backButton.previousTitleText(false);
@@ -823,7 +829,6 @@
 	                templateUrl: 'templates/product.html',
 	                controller: 'ProductCtrl',
 	                controllerAs: 'vm'
-
 	            }
 	        }
 	    }).state('app.brewery', {
@@ -835,6 +840,19 @@
 	            'menuContent': {
 	                templateUrl: 'templates/brewery.html',
 	                controller: 'BreweryCtrl',
+	                controllerAs: 'vm'
+
+	            }
+	        }
+	    }).state('app.payment', {
+	        url: '/payment',
+	        params: {
+	            totalPrice: 0
+	        },
+	        views: {
+	            'menuContent': {
+	                templateUrl: 'templates/payment.html',
+	                controller: 'PaymentCtrl',
 	                controllerAs: 'vm'
 
 	            }
@@ -977,7 +995,7 @@
 	    // FACEBOOK login
 	    function fbLogin() {
 	        $scope.$emit("SendUp", true);
-	        ngFB.login({ scope: 'email, publish_actions' }).then(
+	        ngFB.login({ scope: 'email, publish_actions, user_friends' }).then(
 	        // , user_friends , user_about_me, user_education_history, user_work_history, manage_pages, publish_pages, pages_show_list, 
 	        function (response) {
 	            if (response.status === 'connected') {
@@ -1159,13 +1177,13 @@
 	                _this3.ionicMaterialMotion.slideUp({
 	                    selector: '.slide-up'
 	                });
-	            }, 300);
+	            }, 0);
 
 	            this.$timeout(function () {
 	                _this3.ionicMaterialMotion.fadeSlideInRight({
-	                    startVelocity: 1000
+	                    startVelocity: 3000
 	                });
-	            }, 700);
+	            }, 0);
 	        }
 	    }]);
 
@@ -1300,9 +1318,13 @@
 
 	var _activity2 = _interopRequireDefault(_activity);
 
+	var _activity3 = __webpack_require__(17);
+
+	var _activity4 = _interopRequireDefault(_activity3);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	exports.default = angular.module('app.activity', []).controller('ActivityCtrl', _activity2.default).name;
+	exports.default = angular.module('app.activity', []).controller('ActivityCtrl', _activity2.default).service('activitySvc', _activity4.default).name;
 
 /***/ },
 /* 16 */
@@ -1313,26 +1335,98 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	/* @ngInject */
-	function ActivityCtrl($scope, $stateParams, $timeout, ionicMaterialMotion, $state) {
-	    var vm = this;
-	    localStorage.setItem('appState', $state.current.name);
 
-	    activate();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	    function activate() {
-	        $timeout(function () {
-	            ionicMaterialMotion.fadeSlideIn({
-	                selector: '.animate-fade-slide-in .item'
-	            });
-	        }, 200);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var ActivityCtrl = function () {
+	    /* @ngInject */
+	    function ActivityCtrl($scope, $stateParams, activitySvc, $state) {
+	        _classCallCheck(this, ActivityCtrl);
+
+	        console.log('gone');
+	        this.$scope = $scope;
+	        this.$stateParams = $stateParams;
+	        this.$state = $state;
+	        this.activitySvc = activitySvc;
+
+	        this.activate();
+
+	        localStorage.setItem('appState', this.$state.current.name);
 	    }
-	}
+
+	    _createClass(ActivityCtrl, [{
+	        key: 'activate',
+	        value: function activate() {
+	            this.loadUserHistory();
+	        }
+	    }, {
+	        key: 'loadUserHistory',
+	        value: function loadUserHistory() {
+	            var _this = this;
+
+	            this.activitySvc.getUserHistory().then(function (payments) {
+	                _this.payments = payments;
+	            });
+	        }
+	    }, {
+	        key: 'goCart',
+	        value: function goCart() {
+	            this.$state.go('app.cart');
+	        }
+	    }]);
+
+	    return ActivityCtrl;
+	}();
 
 	exports.default = ActivityCtrl;
 
 /***/ },
 /* 17 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var activitySvc = function () {
+	    /*@ngInject*/
+	    function activitySvc($http, SERVER) {
+	        _classCallCheck(this, activitySvc);
+
+	        this.$http = $http;
+	        this.SERVER = SERVER;
+	    }
+
+	    _createClass(activitySvc, [{
+	        key: 'getUserHistory',
+	        value: function getUserHistory() {
+	            return this.$http({
+	                method: 'POST',
+	                url: this.SERVER.URL + 'userHistory',
+	                data: {
+	                    profileId: localStorage.getItem('profileId')
+	                }
+	            }).then(function (response) {
+	                return response.data;
+	            });
+	        }
+	    }]);
+
+	    return activitySvc;
+	}();
+
+	exports.default = activitySvc;
+
+/***/ },
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1341,7 +1435,7 @@
 	    value: true
 	});
 
-	var _gallery = __webpack_require__(18);
+	var _gallery = __webpack_require__(19);
 
 	var _gallery2 = _interopRequireDefault(_gallery);
 
@@ -1350,7 +1444,7 @@
 	exports.default = angular.module('app.gallery', []).controller('GalleryCtrl', _gallery2.default).name;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1384,7 +1478,7 @@
 	exports.default = GalleryCtrl;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1393,11 +1487,11 @@
 	    value: true
 	});
 
-	var _userProfile = __webpack_require__(20);
+	var _userProfile = __webpack_require__(21);
 
 	var _userProfile2 = _interopRequireDefault(_userProfile);
 
-	var _userProfile3 = __webpack_require__(21);
+	var _userProfile3 = __webpack_require__(22);
 
 	var _userProfile4 = _interopRequireDefault(_userProfile3);
 
@@ -1406,7 +1500,7 @@
 	exports.default = angular.module('app.userProfile', []).service('userProfileSvc', _userProfile4.default).controller('UserProfileCtrl', _userProfile2.default).name;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1484,7 +1578,7 @@
 	            var _this2 = this;
 
 	            this.ngFB.api({
-	                path: '/me/taggable_friends'
+	                path: '/me/friends'
 	            }).then(function (taggable_friends) {
 	                _this2.friends = taggable_friends.data;
 	                console.log('taggable_friends', _this2.friends);
@@ -1524,7 +1618,7 @@
 	exports.default = UserProfileCtrl;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1576,7 +1670,7 @@
 	exports.default = userProfileSvc;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1585,11 +1679,11 @@
 	    value: true
 	});
 
-	var _search = __webpack_require__(23);
+	var _search = __webpack_require__(24);
 
 	var _search2 = _interopRequireDefault(_search);
 
-	var _search3 = __webpack_require__(24);
+	var _search3 = __webpack_require__(25);
 
 	var _search4 = _interopRequireDefault(_search3);
 
@@ -1598,7 +1692,7 @@
 	exports.default = angular.module('app.search', []).controller('SearchCtrl', _search2.default).service('searchSvc', _search4.default).name;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1672,7 +1766,7 @@
 	exports.default = SearchCtrl;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1727,7 +1821,7 @@
 	exports.default = searchSvc;
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1736,7 +1830,7 @@
 	    value: true
 	});
 
-	var _rating = __webpack_require__(26);
+	var _rating = __webpack_require__(27);
 
 	var _rating2 = _interopRequireDefault(_rating);
 
@@ -1745,7 +1839,7 @@
 	exports.default = angular.module('app.rating', []).controller('RatingCtrl', _rating2.default).name;
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1802,7 +1896,7 @@
 	exports.default = RatingCtrl;
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1811,11 +1905,11 @@
 	    value: true
 	});
 
-	var _cart = __webpack_require__(28);
+	var _cart = __webpack_require__(29);
 
 	var _cart2 = _interopRequireDefault(_cart);
 
-	var _cart3 = __webpack_require__(29);
+	var _cart3 = __webpack_require__(30);
 
 	var _cart4 = _interopRequireDefault(_cart3);
 
@@ -1824,7 +1918,7 @@
 	exports.default = angular.module('app.cart', []).controller('CartCtrl', _cart2.default).service('cartSvc', _cart4.default).name;
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1931,6 +2025,11 @@
 	                });
 	            }, 0);
 	        }
+	    }, {
+	        key: 'pay',
+	        value: function pay() {
+	            this.$state.go('app.payment', { totalPrice: this.cart.total });
+	        }
 	    }]);
 
 	    return CartCtrl;
@@ -1939,7 +2038,7 @@
 	exports.default = CartCtrl;
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2025,7 +2124,7 @@
 	exports.default = cartSvc;
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2034,11 +2133,11 @@
 	    value: true
 	});
 
-	var _about = __webpack_require__(31);
+	var _about = __webpack_require__(32);
 
 	var _about2 = _interopRequireDefault(_about);
 
-	var _about3 = __webpack_require__(32);
+	var _about3 = __webpack_require__(33);
 
 	var _about4 = _interopRequireDefault(_about3);
 
@@ -2047,7 +2146,7 @@
 	exports.default = angular.module('app.about', []).controller('AboutCtrl', _about2.default).service('aboutSvc', _about4.default).name;
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2137,7 +2236,7 @@
 	exports.default = AboutCtrl;
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2223,7 +2322,7 @@
 	exports.default = aboutSvc;
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2232,11 +2331,11 @@
 	    value: true
 	});
 
-	var _product = __webpack_require__(34);
+	var _product = __webpack_require__(35);
 
 	var _product2 = _interopRequireDefault(_product);
 
-	var _product3 = __webpack_require__(35);
+	var _product3 = __webpack_require__(36);
 
 	var _product4 = _interopRequireDefault(_product3);
 
@@ -2245,7 +2344,7 @@
 	exports.default = angular.module('app.product', []).controller('ProductCtrl', _product2.default).service('productSvc', _product4.default).name;
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2372,7 +2471,7 @@
 	exports.default = ProductCtrl;
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2435,7 +2534,7 @@
 	exports.default = productSvc;
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2444,11 +2543,11 @@
 	    value: true
 	});
 
-	var _brewery = __webpack_require__(37);
+	var _brewery = __webpack_require__(38);
 
 	var _brewery2 = _interopRequireDefault(_brewery);
 
-	var _brewery3 = __webpack_require__(38);
+	var _brewery3 = __webpack_require__(39);
 
 	var _brewery4 = _interopRequireDefault(_brewery3);
 
@@ -2457,7 +2556,7 @@
 	exports.default = angular.module('app.brewery', []).controller('BreweryCtrl', _brewery2.default).service('brewerySvc', _brewery4.default).name;
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2573,7 +2672,7 @@
 	exports.default = BreweryCtrl;
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2623,6 +2722,145 @@
 	}();
 
 	exports.default = brewerySvc;
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _payment = __webpack_require__(41);
+
+	var _payment2 = _interopRequireDefault(_payment);
+
+	var _payment3 = __webpack_require__(42);
+
+	var _payment4 = _interopRequireDefault(_payment3);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = angular.module('app.payment', []).controller('PaymentCtrl', _payment2.default).service('paymentSvc', _payment4.default).name;
+
+/***/ },
+/* 41 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var PaymentCtrl = function () {
+	    /* @ngInject */
+	    function PaymentCtrl($scope, $stateParams, $timeout, ngFB, ionicMaterialMotion, ionicMaterialInk, $state, paymentSvc, commonSvc) {
+	        var _this = this;
+
+	        _classCallCheck(this, PaymentCtrl);
+
+	        this.$scope = $scope;
+	        this.$timeout = $timeout;
+	        this.ionicMaterialMotion = ionicMaterialMotion;
+	        this.ionicMaterialInk = ionicMaterialInk;
+	        this.$state = $state;
+	        this.paymentSvc = paymentSvc;
+	        this.commonSvc = commonSvc;
+	        this.payment = {};
+	        this.totalPrice = $stateParams.totalPrice;
+	        // Stripe Response Handler
+	        this.$scope.stripeCallback = function (code, result) {
+	            if (result.error) {
+	                _this.stripeError = result.error.message;
+	            } else {
+	                // Grab the form:
+	                var form = angular.element(document.getElementsByName('form'));
+
+	                // Get the token ID:
+	                var token = result.id;
+	                console.log(token);
+
+	                // Insert the token ID into the form so it gets submitted to the server:
+	                form.append('<input type="hidden" name="stripeToken" value="' + token + '">');
+
+	                // Submit the form:
+	                // form.get(0).submit();
+	                _this.paymentSvc.charge(token, _this.totalPrice).then(function (response) {
+	                    _this.processing = false;
+	                    _this.$state.go('app.activity');
+	                });
+	            }
+	        };
+	    }
+
+	    _createClass(PaymentCtrl, [{
+	        key: 'onSubmit',
+	        value: function onSubmit() {
+	            this.processing = true;
+	        }
+	    }, {
+	        key: 'goCart',
+	        value: function goCart() {
+	            this.$state.go('app.cart');
+	        }
+	    }]);
+
+	    return PaymentCtrl;
+	}();
+
+	exports.default = PaymentCtrl;
+
+/***/ },
+/* 42 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var paymentSvc = function () {
+	    /*@ngInject*/
+	    function paymentSvc($http, SERVER) {
+	        _classCallCheck(this, paymentSvc);
+
+	        this.$http = $http;
+	        this.SERVER = SERVER;
+	    }
+
+	    _createClass(paymentSvc, [{
+	        key: 'charge',
+	        value: function charge(stripeToken, stripeMoney) {
+	            return this.$http({
+	                method: 'POST',
+	                url: this.SERVER.URL + 'payment',
+	                data: {
+	                    profileId: localStorage.getItem('profileId'),
+	                    stripeToken: stripeToken,
+	                    stripeMoney: stripeMoney
+	                }
+	            }).then(function (response) {
+	                return console.log(response.data);
+	            });
+	        }
+	    }]);
+
+	    return paymentSvc;
+	}();
+
+	exports.default = paymentSvc;
 
 /***/ }
 /******/ ]);

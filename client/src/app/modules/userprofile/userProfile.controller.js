@@ -55,7 +55,7 @@ class UserProfileCtrl {
 
     loadFriends() {
         this.ngFB.api({
-            path: '/me/taggable_friends',
+            path: '/me/friends',
         }).then(
             (taggable_friends) => {
                 this.friends = taggable_friends.data;

@@ -37,5 +37,8 @@
     "passport-local": "^1.0.0",
     "stripe": "^4.1.0",
     "winston": "2.1.1"
+  },
+  "devDependencies": {
+    "stripe": "^4.13.0"
   }
 }

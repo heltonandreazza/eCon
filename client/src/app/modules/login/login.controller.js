@@ -18,7 +18,7 @@ function LoginCtrl($scope, $timeout, $stateParams, ionicMaterialInk, ngFB, $stat
     // FACEBOOK login
     function fbLogin() {
         $scope.$emit("SendUp", true);
-        ngFB.login({ scope: 'email, publish_actions' }).then(
+        ngFB.login({ scope: 'email, publish_actions, user_friends' }).then(
             // , user_friends , user_about_me, user_education_history, user_work_history, manage_pages, publish_pages, pages_show_list, 
             function(response) {
                 if (response.status === 'connected') {

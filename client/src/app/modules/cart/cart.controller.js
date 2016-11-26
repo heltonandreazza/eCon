@@ -68,6 +68,10 @@ class CartCtrl {
             });
         }, 0);
     }
+
+    pay() {
+        this.$state.go('app.payment', { totalPrice: this.cart.total });
+    }
 }
 
 export default CartCtrl;

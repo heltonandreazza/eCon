@@ -214,3 +214,7 @@ div.tabs-striped .tabs {
 .blue {
     color: blue;
 }
+
+.ng-invalid {
+    color: red;
+}

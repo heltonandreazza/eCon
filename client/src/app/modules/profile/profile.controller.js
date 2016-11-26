@@ -102,13 +102,13 @@ class ProfileCtrl {
             this.ionicMaterialMotion.slideUp({
                 selector: '.slide-up'
             });
-        }, 300);
+        }, 0);
 
         this.$timeout(() => {
             this.ionicMaterialMotion.fadeSlideInRight({
-                startVelocity: 1000
+                startVelocity: 3000
             });
-        }, 700);
+        }, 0);
     }
 }
 

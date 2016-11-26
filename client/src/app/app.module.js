@@ -13,12 +13,14 @@ import cart from './modules/cart/cart.module';
 import about from './modules/about/about.module';
 import product from './modules/product/product.module';
 import brewery from './modules/brewery/brewery.module';
+import payment from './modules/payment/payment.module';
 
 angular.module('app', [
         'ionic',
         'ionic-material',
         'ionMdInput',
         'ion-floating-menu',
+        'angularPayments',
         ngOpenFB,
         core,
         common,
@@ -33,7 +35,8 @@ angular.module('app', [
         cart,
         about,
         product,
-        brewery
+        brewery,
+        payment
     ])
     .run(function($window, ngFB) {
         //set api auth public
@@ -42,6 +45,8 @@ angular.module('app', [
         ngFB.init({ appId: '914923135308655' });
         //set key to use filepicker
         filepicker.setKey('AUxfOdq2QTCOI7WA9Uopwz');
+        //set key to use stripe
+        $window.Stripe.setPublishableKey('pk_test_sAhz1rf5oASMgrPIe6v36Zte');
     });
 
 var openFB = (function() {

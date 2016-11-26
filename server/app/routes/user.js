@@ -47,7 +47,16 @@ const findUser = (profileId) => {
     });
 }
 
+const history = (req, res, next) => {
+    return User.findOne({ profileId: req.body.profileId })
+        .populate('history.items.item')
+        .exec((err, user) => {
+            if (err) res.json(err);
+            res.json(user.history);
+        });
+}
 
 module.exports = {
-    login
+    login,
+    history
 }

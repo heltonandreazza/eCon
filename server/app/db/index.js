@@ -18,8 +18,24 @@ const userSchema = new Schema({
     address: String,
     email: { type: String, unique: true, lowercase: true },
     history: [{
-        paid: { type: Number, default: 0 },
-        item: { type: Schema.Types.ObjectId, ref: 'product' }
+        id: String,
+        amount: { type: Number, default: 0 },
+        currency: String,
+        items: [{
+            item: { type: Schema.Types.ObjectId, ref: 'product' },
+            quantity: { type: Number, default: 1 },
+            price: { type: Number, default: 0 },
+            paid: { type: Number, default: 0 }
+        }],
+        card: {
+            brand: String,
+            country: String,
+            customer: String,
+            exp_month: { type: Number, default: 0 },
+            exp_year: { type: Number, default: 0 },
+            funding: String,
+            last4: String
+        }
     }],
     token: String
 });

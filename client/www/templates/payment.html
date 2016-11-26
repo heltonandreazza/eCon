@@ -38,6 +38,9 @@
                         </button>
                     </label>
                 </div>
+                <div ng-if="vm.processing" style="text-align: center;">
+                    <ion-spinner icon="spiral"></ion-spinner>
+                </div>
             </form>
         </div>
     </ion-content>

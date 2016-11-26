@@ -218,3 +218,8 @@ div.tabs-striped .tabs {
 .ng-invalid {
     color: red;
 }
+
+.spinner svg {
+    width: 60px;
+    height: 60px;
+}
